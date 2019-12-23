@@ -167,7 +167,7 @@
     </pipeline>
   </mode>
 
-  <mode name="eng-cym" install="no">
+  <mode name="eng-cym" install="no" gendebug="yes">
     <pipeline>
       <program name="lt-proc">
         <file name="eng-cym.automorf.bin"/>
