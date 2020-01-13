@@ -137,12 +137,12 @@ NPloc -> np.top { 1 } |
          np np { 1 _1 2 } ;
 
 SN -> num [$nbr=(if ((1.lem/tl = "1") or (1.lem/tl = one)) sg else pl)] { %1 } |
-      %N { a@det.indef.sp _ %1 } |
+      %N { a@det.ind.sg _ %1 } |
       %DN { %1 } |
       1: num.mon.$nbr/tl [$lem=mon] { %1 } |
       NP_AC.$nbr { %1 } |
-      prpers@prn.subj.$nbr/tl [$lem=prnsubj] { %1(prn_pers) } |
-      prpers@prn.obj.$nbr/tl [$lem=prnobj] { %1(prn_pers) } |
+      %prpers@prn.subj [$lem=prnsubj] { %1(prn_pers) } |
+      %prpers@prn.obj [$lem=prnobj] { %1(prn_pers) } |
       prn.tn.$nbr/tl [$lem=prn] { %1(prn_impers) } |
       prn.itg.$nbr/tl [$lem=prn] { %1(prn_impers) } |
       num o@postnum %det n { 1 _1 _2 3 _3 %4 } |

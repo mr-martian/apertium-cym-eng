@@ -220,7 +220,7 @@
       <program name="lt-proc -b">
         <file name="cym-eng.autobil.bin"/>
       </program>
-      <program name="apertium-postchunk">
+      <program name="rtx-proc">
         <file name="cym-eng.rtx.bin"/>
       </program>
       <program name="lt-proc $1">
@@ -240,12 +240,11 @@
         <file name="eng-cym.prob"/>
       </program>
       <program name="apertium-pretransfer"/>
+      <program name="apertium-biltrans">
+        <file name="eng-cym.autobil.bin"/>
+      </program>
       <program name="rtx-proc">
         <file name="eng-cym.rtx.bin"/>
-      </program>
-      <program name="apertium-transfer -n">
-        <file name="pre-eng-cym.t1x"/>
-        <file name="pre-eng-cym.t1x.bin"/>
       </program>
       <program name="lt-proc $1">
         <file name="eng-cym.autogen.bin"/>

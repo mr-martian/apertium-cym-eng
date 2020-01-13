@@ -139,7 +139,7 @@ $(PREFIX2).t3x.bin: $(BASENAME).$(PREFIX2).t3x
 	apertium-validate-postchunk $<
 	apertium-preprocess-transfer $< $@
 
-$(PREFIX1).rtx.bin: $(BASENAME).$(PREFIX2).rtx
+$(PREFIX1).rtx.bin: $(BASENAME).$(PREFIX1).rtx
 	rtx-comp $< $@
 
 $(PREFIX2).rtx.bin: $(BASENAME).$(PREFIX2).rtx
