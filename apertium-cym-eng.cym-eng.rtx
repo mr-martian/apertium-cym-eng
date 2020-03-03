@@ -1,15 +1,18 @@
-num: a_num.nbr;
+num: a_num;
 np: a_nom.gen.nbr;
+np_top: a_nom.nbr;
 prn_pers: a_prn.pers.gen.nbr;
 prn_impers: a_prn.gen.nbr;
 det: a_det.nbr;
-n: a_nom.nbr;
+n_base: a_nom.nbr;
 pr: _;
 guio: _;
 adv: _;
 cm: _;
 cnjcoo: _;
 cnjsub: _;
+
+n: (always 1(n_base)[nbr=(if (1.nbr = sp) sg else 1.nbr)]);
 
 rel: _.<an>.<mf>.<sp>;
 
@@ -63,14 +66,20 @@ conj_verb: (if ((1.a_verb/tl = vbser) and (1.temps/sl in vbsercj_temps) and
             if ((1.temps/sl = plu) or (1.temps/sl = past) or (1.temps/sl = pii))
                1(verb_impers)[temps=past]);
 
+temps_for_impers = past pres pii;
+
 verbcj: _.a_verb.temps.pers.nbr;
 verbcj -> %vblex.[vbcj_temps]
           [$lem=(if ((1.temps/sl = cni) or (1.temps/sl = cns) or (1.temps/sl = fut)) aux_verb else verbcj)]
           { %1(conj_verb) } |
 
+          2: %vblex.[temps_for_impers].impers [$lem=verbcj]
+          { !prpers(prn_pers)[a_prn="prn.subj", gen=nt, nbr=sg, lemcase=$lemcase] _
+            be(verb_impers)[a_verb=vbser, temps=1.temps] _ 1(verb_impers)[temps=pp, lemcase=aa] } |
+
           %vbser.[vbcj_temps]
           [$lem=(if ((1.temps/sl = cni) or (1.temps/sl = cns) or (1.temps/sl = fut)) aux_verb else verbcj)]
-          { %1(conj_verb) } |
+          { %1(conj_verb)[lemcase=$lemcase] } |
 
           1: %vbser.[vbsercj_temps].*.sg
           [$lem=verbcj, $temps=(if ((1.pers/sl = p1) or (1.pers/sl = p3)) past else 1.temps)]
@@ -104,40 +113,44 @@ adj: (if (1.a_adj/tl = "adj.sint") 1(adj_sint)
          [ more@adv _ 1(adj_no_sint) ]
       if ((1.a_adj/sl = "adj.sint") and (1.deg/sl = sup))
          [ most@adv _ 1(adj_no_sint) ]
+      if (1.pos_tag/tl = det)
+         1(det)
       else 1(adj_no_sint));
 
 NP_AC: _.nbr;
 NP_AC -> np.ant.$nbr/tl { %1 } |
          np.cog.$nbr/tl { %1 } |
-         * np.cog.$nbr/tl { 1 _1 %2 } |
+         !* np.cog.$nbr/tl { 1 _1 %2 } |
          NP_AC.$nbr NP_AC { %1 _1 %2 } |
          NP_AC.$nbr guio NP_AC { %1 _1 2 _2 %3 } ;
 
 N: _.nbr;
-N -> %n { 1 } |
-     %n N { 2 _1 1 } |
+N -> %n { %1 } |
+     !%n N { 2 _1 1 } |
+     %n N { %1 _1 2 } |
      1: %n adj { 2 _1 1 } |
      adj %n { 1 _1 2 } |
      %n guio n { 1 _1 2 _2 3 } |
-     n adj adj (if (2.lem/sl = llawer) { much@det.qnt.sg 3 1 }
-                else { 3 2 1 }) |
+     n adj adj (if (2.lem/sl = llawer) { much@det.qnt.sg _2 3 _1 1 }
+                else { 3 _2 2 _1 1 }) |
      num N [$nbr=(if ((1.lem/tl = "1") or (1.lem/tl = one)) sg else pl)] { %1 _1 %2 } |
      %n cm n { 1 _1 2 _2 3 } |
      %n cm n n { 1 _1 2 _2 3 _3 4 } ;
 
 DN: _.nbr;
-DN -> det %N ?(1.a_det/sl not = "det.pos") { 1 _1 2 } |
-      %np.top { 1 } |
-      %N DN { the@det.def.sp _ 1 _ of@pr _ 2 } ;
+DN -> det %N { 1 _1 2 } |
+      %np.top { 1(np_top) } |
+      N DN [$nbr=(if (1.nbr = sp) 2.nbr else 1.nbr)] { the@det.def.sp _ %1 _ of@pr _ 2 } ;
 
 NPloc: _;
-NPloc -> np.top { 1 } |
-         det np.top { 2 } |
+NPloc -> np.top { 1(np_top) } |
+         det np.top { 2(np_top) } |
          np { 1 } |
          np np { 1 _1 2 } ;
 
 SN -> num [$nbr=(if ((1.lem/tl = "1") or (1.lem/tl = one)) sg else pl)] { %1 } |
-      %N { a@det.ind.sg _ %1 } |
+      !%N { a@det.ind.sg _ %1 } |
+      %N { %1 } |
       %DN { %1 } |
       1: num.mon.$nbr/tl [$lem=mon] { %1 } |
       NP_AC.$nbr { %1 } |
@@ -187,11 +200,11 @@ impers_temps = cni cns pii fut pres past plu prs;
 SV -> %vblex.[impers_temps].impers { be@vbser.[1.temps/tl] _ 1(verb_impers)[temps=pp] } |
       %vbser.[impers_temps].impers { be@vbser.[1.temps/tl] _ 1(verb_impers)[temps=pp] } ;
 
-SV -> %verbcj { %1 } |
-      %vblex.imp { 1(verb_impers) } |
-      %vblex.ger { %1(verb_impers) } |
-      %vblex.inf { %1(verb_impers) } ;
-SV -> 1: %cael@vblex.inf [$lem=verbcael] { %1(verb_impers) } |
+temps_impers = imp ger inf;
+
+SV -> %verbcj { %1[lemcase=$lemcase] } |
+      %vblex.[temps_impers] { %1(verb_impers) } |
+      1: %cael@vblex.inf [$lem=verbcael] { %1(verb_impers) } |
       %vbser.inf { %1(verb_impers) } |
       %vaux { %1(verb_impers) } ;
 
@@ -201,8 +214,8 @@ SV -> yn@pr vblex.inf.$a_verb/tl [$temps=ger, $lem=verbger] { %2(verb_impers) } 
 
 SV -> vbser.pres.$temps/tl.$pers/tl.$nbr/tl vblex.inf [$a_verb=vblex, $lem=verbcj_verbger]
       { (if (((1.pers/sl = p1) or (1.pers/sl = p3)) and (1.nbr/sl = sg))
-            %1(verb_pers)
-         else 1(verb_impers)[temps=pres])
+            %1(verb_pers)[a_verb=1.a_verb/tl]
+         else 1(verb_impers)[temps=pres, a_verb=1.a_verb/tl])
         _1 2(verb_impers)[temps=ger] } ;
 
 SV -> %verbcj yn@pr vblex.inf [$lem=verbcj_verbger] { 1 _1 3(verb_impers)[temps=ger] } ;
@@ -242,7 +255,7 @@ t2x -> o@postnum SV.vblex.inf { _1 2[temps=ger] } |
 
 rel SV -> rel vbser.pres.$a_verb/tl yn@pr vblex.inf
           [$temps=pres, $pers=p3, $nbr=sg, $lem=verbcj]
-          { 1 _ { %4(verb_pers) } } ;
+          { 1 _ { %4(verb_pers)[a_verb=4.a_verb] } } ;
 SP: _;
 SP -> pr.$lem/sl { 1 } ;
 
@@ -287,7 +300,10 @@ t2x -> prn@SN SV [$temps=(if (1.temps = pii) past if (1.lem = verbcj) 1.temps el
 
        SV ARG [$temps=(if (1.temps = pii) past if (1.lem = verbcj) 1.temps else pres)]
        (if ((1.temps = inf) or (1.temps = imp)) { 1[nbr=2.nbr] _ 2 }
-        else { 2[lemcase=1.lemcase] _ 1[lemcase=2.lemcase, nbr=2.nbr] }) ;
+        else { 2[lemcase=1.lemcase] _ 1[lemcase=2.lemcase, nbr=2.nbr] }) |
+       3: SV.vbser ARG adj [$temps=(if (1.temps = pii) past if (1.lem = verbcj) 1.temps else pres)]
+       (if ((1.temps = inf) or (1.temps = imp)) { 1[nbr=2.nbr] _ 2 _ 3 }
+        else { 2[lemcase=1.lemcase] _ 1[lemcase=2.lemcase, nbr=2.nbr] _ 3 }) ;
 
 t2x -> SV SN SN [$temps=(if (1.temps = pii) past if (1.lem = verbcj) 1.temps else pres)]
        { 2[lemcase=1.lemcase] _ 1[lemcase=2.lemcase, nbr=2.nbr] _ 3 } ;

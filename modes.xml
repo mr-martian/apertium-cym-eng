@@ -130,7 +130,7 @@
         <file name="apertium-cym-eng.cym-eng.t1x"/>
         <file name="cym-eng.t1x.bin"/>
       </program>
-      <program name="apertium-interchunk">
+      <program name="apertium-interchunk -t">
         <file name="apertium-cym-eng.cym-eng.t2x"/>
         <file name="cym-eng.t2x.bin"/>
       </program>
